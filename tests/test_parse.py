@@ -91,3 +91,26 @@ def test_empty_payloads_do_not_crash():
     assert d.last_bolus is None
     assert d.data_through is None
     assert d.bolus_insulin_today == 0
+
+
+def test_pump_mode_since_walks_chained_segments_in_any_order():
+    # Real-world shape: one segment per sync plus a midnight split, oldest listed first.
+    graph = {"series": {"pumpOp5AutomaticMode": [
+        {"timestamp": "2026-01-14T14:28:29.000Z", "endTimestamp": "2026-01-14T14:58:29.000Z"},
+        {"timestamp": "2026-01-14T14:58:30.000Z", "endTimestamp": "2026-01-14T23:59:59.000Z"},
+        {"timestamp": "2026-01-15T00:00:00.000Z", "endTimestamp": "2026-01-15T07:48:32.000Z"},
+        {"timestamp": "2026-01-15T07:48:32.000Z", "endTimestamp": "2026-01-15T09:18:33.000Z"},
+        {"timestamp": "2026-01-15T00:00:00.000Z", "endTimestamp": "2026-01-15T07:48:32.000Z"},
+    ]}}
+    d = _parse(graph=graph)
+    assert d.pump_mode == "automated"
+    assert d.pump_mode_since == datetime(2026, 1, 14, 14, 28, 29, tzinfo=TZ)
+
+
+def test_pump_mode_since_stops_at_gap():
+    graph = {"series": {"pumpOp5AutomaticMode": [
+        {"timestamp": "2026-01-14T10:00:00.000Z", "endTimestamp": "2026-01-14T11:00:00.000Z"},
+        {"timestamp": "2026-01-14T12:00:00.000Z", "endTimestamp": "2026-01-14T13:00:00.000Z"},
+    ]}}
+    d = _parse(graph=graph)
+    assert d.pump_mode_since == datetime(2026, 1, 14, 12, 0, tzinfo=TZ)
