@@ -1,5 +1,9 @@
 # Glooko for Home Assistant
 
+[![Validate](https://github.com/mmxca/glookup-ha-integration/actions/workflows/validate.yml/badge.svg)](https://github.com/mmxca/glookup-ha-integration/actions/workflows/validate.yml)
+[![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://hacs.xyz)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 A **read-only** Home Assistant custom integration that brings your insulin-pump data from
 [Glooko](https://my.glooko.com) into Home Assistant: last bolus, IOB at that bolus, carbs,
 pump mode (Automated / Limited / Manual / HypoProtect), pod change and expiry, CGM sensor change,
@@ -60,8 +64,6 @@ Glooko only stores what the pump cloud hands it.
 ## Installation
 
 ### Option A: HACS (custom repository)
-
-> HACS can only install from a **public** GitHub repository. If this repo is private, use Option B.
 
 1. In Home Assistant open **HACS → ⋮ (top right) → Custom repositories**.
 2. Repository: `https://github.com/mmxca/glookup-ha-integration`, Type: **Integration** → **Add**.
@@ -230,16 +232,22 @@ source.
 
 ---
 
-## Development
+## Contributing
+
+Contributions are welcome through **fork → branch → pull request**. `main` is protected, and only the
+maintainers merge. See **[CONTRIB.md](CONTRIB.md)** for setup, tests and guidelines,
+[SECURITY.md](SECURITY.md) for reporting vulnerabilities privately, and
+[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+
+Questions and setup help: [Discussions](https://github.com/mmxca/glookup-ha-integration/discussions).
+
+Quick start for developers:
 
 ```bash
 python -m venv .venv && . .venv/bin/activate
 pip install pytest-homeassistant-custom-component
 python -m pytest            # parser + config-flow + setup tests
 ```
-
-`tests/test_parse.py` runs without Home Assistant (`pip install pytest` is enough). Test fixtures are
-**synthetic**. Never commit real Glooko exports.
 
 Roadmap: v2 incremental endpoints (full history, alarms with codes), basal-rate detail,
 `glooko.refresh` service, investigate triggering Glooko's on-demand pump sync.
