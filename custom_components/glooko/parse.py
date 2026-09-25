@@ -190,15 +190,22 @@ def parse(
                 best = (end, start, mode)
     if best:
         data.pump_mode, data.pump_mode_since = best[2], best[1]
-        # Mode spans are split at midnight; walk back to the real start of this mode.
-        for key, mode in MODE_SERIES.items():
-            if mode != data.pump_mode:
-                continue
-            for span in series.get(key) or []:
-                start = local_ts(span.get("timestamp"), tz)
-                end = local_ts(span.get("endTimestamp"), tz)
-                if start and end and data.pump_mode_since and abs((end - data.pump_mode_since).total_seconds()) <= 1:
-                    data.pump_mode_since = min(data.pump_mode_since, start)
+        # Glooko splits one continuous mode into segments (at midnight and at every sync).
+        # Walk back through touching segments until the start stops moving.
+        spans = [
+            (local_ts(s.get("timestamp"), tz), local_ts(s.get("endTimestamp"), tz))
+            for key, mode in MODE_SERIES.items()
+            if mode == data.pump_mode
+            for s in series.get(key) or []
+        ]
+        spans = [(a, b) for a, b in spans if a and b]
+        changed = True
+        while changed and data.pump_mode_since:
+            changed = False
+            for start, end in spans:
+                if start < data.pump_mode_since and abs((end - data.pump_mode_since).total_seconds()) <= 2:
+                    data.pump_mode_since = start
+                    changed = True
 
     # --- pod / sensor / alarms ---
     data.pod_changed = max(
