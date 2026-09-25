@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import re
 from typing import Any
 
 import aiohttp
@@ -38,6 +39,22 @@ class GlookoConnectionError(GlookoError):
     """Network / server problem."""
 
 
+_TOKEN_PATTERNS = (
+    re.compile(r'name=["\']authenticity_token["\'][^>]*value=["\']([^"\']+)["\']', re.I),
+    re.compile(r'value=["\']([^"\']+)["\'][^>]*name=["\']authenticity_token["\']', re.I),
+    re.compile(r'name=["\']csrf-token["\'][^>]*content=["\']([^"\']+)["\']', re.I),
+    re.compile(r'content=["\']([^"\']+)["\'][^>]*name=["\']csrf-token["\']', re.I),
+)
+
+
+def authenticity_token(html: str) -> str | None:
+    """Extract the Rails CSRF token from the web sign-in page."""
+    for pattern in _TOKEN_PATTERNS:
+        if match := pattern.search(html or ""):
+            return match.group(1)
+    return None
+
+
 class GlookoClient:
     """Async Glooko client bound to one account."""
 
@@ -55,6 +72,7 @@ class GlookoClient:
         self._password = password
         self._base = REGIONS[region]
         origin = WEB_ORIGINS[region]
+        self._web = origin
         self._headers = {
             "Accept": "application/json, text/plain, */*",
             "Content-Type": "application/json",
@@ -161,3 +179,54 @@ class GlookoClient:
             _LOGGER.debug("Glooko session expired; signing in again")
             await self.async_login()
             return await self._get(path, params)
+
+    async def async_trigger_sync(self) -> None:
+        """Sign in through the Glooko *website*.
+
+        Glooko starts an ON_DEMAND pull from connected pump clouds (e.g. Insulet Omnipod 5)
+        when a user signs in on the website; the API sign-in used for polling does not.
+        This is a sign-in only: nothing in the account is read or changed by it.
+        """
+        headers = {"User-Agent": _UA, "Accept": "text/html,application/xhtml+xml"}
+        try:
+            async with self._session.get(
+                self._web + "/users/sign_in", params={"locale": "en"}, headers=headers, timeout=_TIMEOUT
+            ) as resp:
+                if resp.status != 200:
+                    raise GlookoConnectionError(f"web sign-in page HTTP {resp.status}")
+                html = await resp.text()
+                cookie = self._session_cookie(resp)
+            token = authenticity_token(html)
+            if not token:
+                raise GlookoError("web sign-in page had no authenticity token")
+            form = {
+                "utf8": "\u2713",
+                "authenticity_token": token,
+                "user[email]": self._email,
+                "user[password]": self._password,
+                "language": "en",
+                "redirect_to": "/",
+                "commit": "Log in",
+            }
+            post_headers = {
+                **headers,
+                "Content-Type": "application/x-www-form-urlencoded",
+                "Origin": self._web,
+                "Referer": self._web + "/users/sign_in",
+            }
+            if cookie:
+                post_headers["Cookie"] = cookie
+            async with self._session.post(
+                self._web + "/users/sign_in",
+                params={"id": "login_form"},
+                data=form,
+                headers=post_headers,
+                timeout=_TIMEOUT,
+                allow_redirects=False,
+            ) as resp:
+                status, location = resp.status, resp.headers.get("Location", "")
+        except (aiohttp.ClientError, TimeoutError) as err:
+            raise GlookoConnectionError(str(err)) from err
+        if status in (301, 302, 303) and "sign_in" not in location:
+            return
+        raise GlookoAuthError(f"web sign-in rejected (HTTP {status})")

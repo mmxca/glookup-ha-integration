@@ -32,12 +32,16 @@ from .const import (
     CONF_SCAN_INTERVAL,
     CONF_SERIAL,
     CONF_STALE_MINUTES,
+    CONF_SYNC_TRIGGER,
     DEFAULT_REGION,
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_STALE_MINUTES,
+    DEFAULT_SYNC_TRIGGER,
     DOMAIN,
     MAX_SCAN_INTERVAL,
+    MAX_SYNC_TRIGGER,
     MIN_SCAN_INTERVAL,
+    MIN_SYNC_TRIGGER,
     REGIONS,
 )
 
@@ -130,8 +134,14 @@ class GlookoOptionsFlow(OptionsFlow):
     """Polling interval and staleness threshold."""
 
     async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        errors: dict[str, str] = {}
         if user_input is not None:
-            return self.async_create_entry(data={k: int(v) for k, v in user_input.items()})
+            values = {k: int(v) for k, v in user_input.items()}
+            trigger = values.get(CONF_SYNC_TRIGGER, DEFAULT_SYNC_TRIGGER)
+            if 0 < trigger < MIN_SYNC_TRIGGER:
+                errors[CONF_SYNC_TRIGGER] = "sync_too_frequent"
+            else:
+                return self.async_create_entry(data=values)
         opts = self.config_entry.options
         schema = vol.Schema(
             {
@@ -142,6 +152,9 @@ class GlookoOptionsFlow(OptionsFlow):
                 vol.Required(CONF_STALE_MINUTES, default=opts.get(CONF_STALE_MINUTES, DEFAULT_STALE_MINUTES)): NumberSelector(
                     NumberSelectorConfig(min=30, max=1440, step=5, unit_of_measurement="min", mode=NumberSelectorMode.BOX)
                 ),
+                vol.Required(CONF_SYNC_TRIGGER, default=opts.get(CONF_SYNC_TRIGGER, DEFAULT_SYNC_TRIGGER)): NumberSelector(
+                    NumberSelectorConfig(min=0, max=MAX_SYNC_TRIGGER, step=5, unit_of_measurement="min", mode=NumberSelectorMode.BOX)
+                ),
             }
         )
-        return self.async_show_form(step_id="init", data_schema=schema)
+        return self.async_show_form(step_id="init", data_schema=schema, errors=errors)

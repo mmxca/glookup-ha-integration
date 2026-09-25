@@ -4,13 +4,21 @@
       "user": {
         "title": "Connect to Glooko",
         "description": "Sign in with the same email and password you use at my.glooko.com. The integration only reads data; it never changes anything in your account.",
-        "data": {"email": "Email", "password": "Password", "region": "Region"},
-        "data_description": {"region": "Where your Glooko account lives. US accounts use us.my.glooko.com."}
+        "data": {
+          "email": "Email",
+          "password": "Password",
+          "region": "Region"
+        },
+        "data_description": {
+          "region": "Where your Glooko account lives. US accounts use us.my.glooko.com."
+        }
       },
       "reauth_confirm": {
         "title": "Re-authenticate Glooko",
         "description": "Glooko rejected the saved credentials for {email}. Enter the current password.",
-        "data": {"password": "Password"}
+        "data": {
+          "password": "Password"
+        }
       }
     },
     "error": {
@@ -29,44 +37,103 @@
     "step": {
       "init": {
         "title": "Glooko options",
-        "data": {"scan_interval": "Polling interval", "stale_minutes": "Mark data stale after"},
+        "data": {
+          "scan_interval": "Polling interval",
+          "stale_minutes": "Mark data stale after",
+          "sync_trigger_minutes": "Ask Glooko to sync every"
+        },
         "data_description": {
           "scan_interval": "How often to poll Glooko (5-60 minutes). Please keep it gentle.",
-          "stale_minutes": "The 'Data stale' problem sensor turns on when the newest pump data is older than this."
+          "stale_minutes": "The 'Data stale' problem sensor turns on when the newest pump data is older than this.",
+          "sync_trigger_minutes": "Glooko only pulls new pump data from Insulet when someone signs in on its website. The integration can do a website sign-in this often to keep data fresh (typically 35-65 min behind instead of hours). Minimum 15. The check runs on each poll, so set the polling interval to 5 min to get a true 15. Set to 0 to turn off."
         }
       }
+    },
+    "error": {
+      "sync_too_frequent": "Use 0 (off) or at least 15 minutes."
     }
   },
   "selector": {
-    "region": {"options": {"us": "United States", "eu": "Europe", "ca": "Canada", "de-fr": "Germany / France"}}
+    "region": {
+      "options": {
+        "us": "United States",
+        "eu": "Europe",
+        "ca": "Canada",
+        "de-fr": "Germany / France"
+      }
+    }
   },
   "entity": {
     "sensor": {
-      "last_bolus": {"name": "Last bolus"},
-      "last_bolus_time": {"name": "Last bolus time"},
-      "iob_at_last_bolus": {"name": "IOB at last bolus"},
-      "bolus_insulin_today": {"name": "Bolus insulin today"},
-      "last_carbs": {"name": "Last carbs"},
-      "carbs_today": {"name": "Carbs today"},
+      "last_bolus": {
+        "name": "Last bolus"
+      },
+      "last_bolus_time": {
+        "name": "Last bolus time"
+      },
+      "iob_at_last_bolus": {
+        "name": "IOB at last bolus"
+      },
+      "bolus_insulin_today": {
+        "name": "Bolus insulin today"
+      },
+      "last_carbs": {
+        "name": "Last carbs"
+      },
+      "carbs_today": {
+        "name": "Carbs today"
+      },
       "pump_mode": {
         "name": "Pump mode",
-        "state": {"automated": "Automated", "limited": "Automated: Limited", "manual": "Manual", "hypoprotect": "HypoProtect", "unknown": "Unknown"}
+        "state": {
+          "automated": "Automated",
+          "limited": "Automated: Limited",
+          "manual": "Manual",
+          "hypoprotect": "HypoProtect",
+          "unknown": "Unknown"
+        }
       },
-      "pod_changed": {"name": "Pod changed"},
-      "pod_expires": {"name": "Pod expires"},
-      "pod_age": {"name": "Pod age"},
-      "cgm_sensor_changed": {"name": "CGM sensor changed"},
-      "last_pump_alarm": {"name": "Last pump alarm"},
-      "last_sync": {"name": "Last Glooko sync"},
-      "data_through": {"name": "Pump data through"},
-      "data_age": {"name": "Pump data age"},
-      "time_in_range_14d": {"name": "Time in range 14d"},
-      "gmi_14d": {"name": "GMI 14d"},
-      "average_glucose_14d": {"name": "Average glucose 14d"}
+      "pod_changed": {
+        "name": "Pod changed"
+      },
+      "pod_expires": {
+        "name": "Pod expires"
+      },
+      "pod_age": {
+        "name": "Pod age"
+      },
+      "cgm_sensor_changed": {
+        "name": "CGM sensor changed"
+      },
+      "last_pump_alarm": {
+        "name": "Last pump alarm"
+      },
+      "last_sync": {
+        "name": "Last Glooko sync"
+      },
+      "data_through": {
+        "name": "Pump data through"
+      },
+      "data_age": {
+        "name": "Pump data age"
+      },
+      "time_in_range_14d": {
+        "name": "Time in range 14d"
+      },
+      "gmi_14d": {
+        "name": "GMI 14d"
+      },
+      "average_glucose_14d": {
+        "name": "Average glucose 14d"
+      }
     },
     "binary_sensor": {
-      "automated_mode": {"name": "Automated mode"},
-      "data_stale": {"name": "Data stale"}
+      "automated_mode": {
+        "name": "Automated mode"
+      },
+      "data_stale": {
+        "name": "Data stale"
+      }
     }
   }
 }

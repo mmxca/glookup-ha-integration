@@ -9,6 +9,7 @@ CONF_DEVICE_ID = "device_id"
 CONF_SERIAL = "serial_number"
 CONF_SCAN_INTERVAL = "scan_interval"
 CONF_STALE_MINUTES = "stale_minutes"
+CONF_SYNC_TRIGGER = "sync_trigger_minutes"
 
 DEFAULT_REGION = "us"
 DEFAULT_SCAN_INTERVAL = 10  # minutes
@@ -16,6 +17,11 @@ MIN_SCAN_INTERVAL = 5
 MAX_SCAN_INTERVAL = 60
 DEFAULT_STALE_MINUTES = 120
 STATS_REFRESH_MINUTES = 60
+# Web sign-in makes Glooko pull from the pump cloud (ON_DEMAND). 0 disables.
+DEFAULT_SYNC_TRIGGER = 30
+MIN_SYNC_TRIGGER = 15  # Glooko's post-sync cooldown measured at ~12 min
+MAX_SYNC_TRIGGER = 240
+SYNC_REFRESH_DELAY = 90  # seconds to wait before re-polling after a trigger
 
 # Glooko API hosts per region (web dashboard uses the same backend).
 REGIONS: dict[str, str] = {
