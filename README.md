@@ -123,8 +123,17 @@ Settings → Devices & services → Glooko → **Configure**:
 |---|---|---|
 | Polling interval | 10 min | 5-60 min |
 | Mark data stale after | 120 min | 30-1440 min |
+| Ask Glooko to sync every | 30 min | 0 (off) or 20-240 min |
 
 Please keep polling gentle. Each poll is 3 small GET requests (a 4th, statistics, once an hour).
+
+**Sync trigger:** Glooko only pulls new pump data from the pump cloud when someone signs in on the
+Glooko **website**. The API sign-in used for polling does not count. With *Ask Glooko to sync every*
+enabled, the integration performs a website sign-in at most that often, and only when Glooko reports
+it is ready for a sync (`syncState: SYNC_ALLOWED`). It re-polls about 90 seconds later to pick up the
+fresh data. That is one extra sign-in per interval, and nothing in your account is changed. The
+outcome is shown on `sensor.glooko_last_glooko_sync` (`sync_state`, `last_sync_trigger`,
+`sync_trigger_result`). Set it to 0 to turn it off.
 
 ---
 
@@ -135,11 +144,13 @@ Measured on a real Omnipod 5 account (September 2026):
 - The Omnipod 5 app uploads to Insulet's cloud about **every 5 minutes**.
 - Glooko pulls from Insulet **on demand** (transfer type `ON_DEMAND`), requesting data only up to
   **now minus 30 minutes**. When a pull happens, the newest pump data is typically **33-45 minutes old**.
-- When nothing asks Glooko for data, pulls may **not happen for many hours** (17 h observed overnight).
-  Watch `sensor.glooko_last_glooko_sync` and `sensor.glooko_pump_data_age` to see what your account
-  does. Whether this integration's own polling triggers pulls is still being evaluated.
+- Glooko only pulls when someone signs in on the Glooko website. The API sign-in used for polling does
+  **not** trigger it. Without that, pulls may **not happen for many hours** (17 h observed overnight).
+- A website sign-in triggers a pull within about 1 second. Glooko then enforces a cooldown of roughly
+  30 minutes (`syncState: ALREADY_SYNCED`).
+- With the sync trigger on (default: every 30 min), pump data typically stays **about 35-65 minutes behind**.
 
-So: expect roughly **35-45 minutes of delay at best**. This is fine for logging, dashboards and
+So: expect roughly **35-65 minutes of delay** with the sync trigger on, and potentially hours with it off. This is fine for logging, dashboards and
 "did I bolus for lunch?" reminders. It is not for anything time-critical.
 
 ---
@@ -200,7 +211,7 @@ actions:
 
 ## How it works
 
-- Signs in with `POST /api/v2/users/sign_in` (the only non-GET request it ever makes), falls back to the v3
+- Signs in with `POST /api/v2/users/sign_in`, falls back to the v3
   sign-in if the account requires it, and keeps the session cookie in memory. It re-signs in automatically
   when the session expires.
 - Each poll (read-only `GET`s against `https://<region>.api.glooko.com`):
@@ -208,6 +219,8 @@ actions:
   - `/api/v3/devices_and_settings`: pump model, last sync
   - `/api/v3/cloud_connections`: Insulet cloud transfers (freshness)
   - `/api/v3/graph/statistics/overall`: 14-day stats (hourly)
+- Sync trigger (optional, default every 30 min): `GET` + `POST https://<region>.my.glooko.com/users/sign_in`,
+  the same form a person uses. Sign-ins are the only non-GET requests the integration ever makes.
 - Glooko quirk handled: event timestamps are the pump's **local wall-clock time with a `Z` suffix**.
   They're interpreted in Home Assistant's configured time zone, so **set HA's time zone to the pump's**.
 
@@ -250,7 +263,7 @@ python -m pytest            # parser + config-flow + setup tests
 ```
 
 Roadmap: v2 incremental endpoints (full history, alarms with codes), basal-rate detail,
-`glooko.refresh` service, investigate triggering Glooko's on-demand pump sync.
+`glooko.refresh` service.
 
 ## License
 

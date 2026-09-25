@@ -9,7 +9,7 @@ Glooko payload samples (sanitized), docs fixes and code are all welcome.
 >    in issues, pull requests, discussions, commits or test fixtures. Redact or synthesize.
 > 2. **The integration stays read-only.** We will not merge anything that writes to a Glooko,
 >    Insulet or pump account (no creating/editing/deleting records, no acknowledging alarms,
->    no settings changes). The sign-in POST is the only non-GET request allowed.
+>    no settings changes). Sign-ins (the API sign-in and the optional website sign-in that triggers a Glooko sync) are the only non-GET requests allowed.
 
 ---
 

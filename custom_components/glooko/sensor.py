@@ -145,7 +145,13 @@ SENSORS: tuple[GlookoSensorDescription, ...] = (
         device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda d: d.last_sync,
-        attrs_fn=lambda d: {"transfer_type": d.last_sync_type, "connection_state": d.connection_state},
+        attrs_fn=lambda d: {
+            "transfer_type": d.last_sync_type,
+            "connection_state": d.connection_state,
+            "sync_state": d.sync_state,
+            "last_sync_trigger": d.last_sync_trigger.isoformat() if d.last_sync_trigger else None,
+            "sync_trigger_result": d.sync_trigger_result,
+        },
     ),
     GlookoSensorDescription(
         key="data_through",

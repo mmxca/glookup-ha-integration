@@ -87,6 +87,9 @@ class GlookoData:
     last_sync_type: str | None = None
     data_through: datetime | None = None
     connection_state: str | None = None
+    sync_state: str | None = None
+    last_sync_trigger: datetime | None = None
+    sync_trigger_result: str | None = None
     stats: dict[str, Any] = field(default_factory=dict)
 
     @property
@@ -226,6 +229,7 @@ def parse(
         if conn.get("integration") != INSULET_INTEGRATION:
             continue
         data.connection_state = conn.get("state")
+        data.sync_state = conn.get("syncState")
         transfers = [t for t in conn.get("transfers") or [] if t.get("success") or t.get("state") == "SUCCESSFUL"]
         transfers.sort(key=lambda t: t.get("timestamp") or "")
         if transfers:

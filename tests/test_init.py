@@ -36,6 +36,7 @@ def mock_client():
     with (
         patch("custom_components.glooko.api.GlookoClient.async_login", new=AsyncMock(return_value="blue-test-0001")) as login,
         patch("custom_components.glooko.api.GlookoClient.async_get", new=AsyncMock(side_effect=_fake_get)) as get,
+        patch("custom_components.glooko.api.GlookoClient.async_trigger_sync", new=AsyncMock()),
     ):
         yield login, get
 
