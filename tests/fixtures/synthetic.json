@@ -1,0 +1,42 @@
+{
+  "graph": {"series": {
+    "deliveredBolus": [
+      {"timestamp": "2026-01-14T18:23:17.000Z", "insulinDelivered": 8.6, "insulinProgrammed": 8.6, "carbsInput": 60.0, "insulinOnBoard": 2.1,
+       "bloodGlucoseInput": 180, "bloodGlucoseInputSource": "CGM", "insulinRecommendationForCarbs": 6.0, "insulinRecommendationForCorrection": 2.6,
+       "totalInsulinRecommendation": 8.6, "isManual": false, "isOverrideAbove": false, "isOverrideBelow": false, "isInterrupted": false},
+      {"timestamp": "2026-01-15T07:09:11.000Z", "insulinDelivered": 1.25, "insulinProgrammed": 1.25, "carbsInput": 0.0, "insulinOnBoard": 0.6,
+       "bloodGlucoseInput": 12300, "bloodGlucoseInputSource": "CGM", "insulinRecommendationForCarbs": 0.0, "insulinRecommendationForCorrection": 1.25,
+       "totalInsulinRecommendation": 1.25, "isManual": false, "isOverrideAbove": false, "isOverrideBelow": false, "isInterrupted": false},
+      {"timestamp": "2026-01-15T06:02:00.000Z", "insulinDelivered": 0.5, "carbsInput": 15.0, "insulinOnBoard": 0.0}
+    ],
+    "carbAll": [
+      {"timestamp": "2026-01-14T18:23:17.000Z", "carbs": 60.0},
+      {"timestamp": "2026-01-15T06:02:00.000Z", "carbs": 15.0}
+    ],
+    "pumpOp5LimitedMode": [
+      {"timestamp": "2026-01-14T12:48:37.000Z", "endTimestamp": "2026-01-14T13:08:29.000Z", "type": "limited"}
+    ],
+    "pumpOp5AutomaticMode": [
+      {"timestamp": "2026-01-14T13:08:29.000Z", "endTimestamp": "2026-01-14T23:59:59.000Z", "type": "automatic"},
+      {"timestamp": "2026-01-15T00:00:00.000Z", "endTimestamp": "2026-01-15T07:48:32.000Z", "type": "automatic"}
+    ],
+    "setSiteChange": [{"timestamp": "2026-01-14T12:49:38.000Z"}],
+    "reservoirChange": [{"timestamp": "2026-01-14T12:49:38.000Z"}],
+    "cgmSensorChange": [{"timestamp": "2026-01-14T12:32:27.000Z"}],
+    "pumpAlarm": []
+  }},
+  "devices": {"devices": [
+    {"type": "pump", "displayName": "Insulet Omnipod 5 System", "lastSyncTimestampUtc": "2026-01-15T14:33:09.557Z"},
+    {"type": "cgm", "displayName": "Dexcom", "lastSyncTimestampUtc": "2026-01-15T14:32:50.425Z"}
+  ]},
+  "connections": [
+    {"integration": "DEXCOM_CLOUD_COM", "state": "CONNECTED", "transfers": []},
+    {"integration": "INSULET_OMNIPOD_5_CLOUD", "state": "CONNECTED", "transfers": [
+      {"timestamp": "2026-01-14T21:33:00.282Z", "state": "SUCCESSFUL", "success": true, "type": "ON_DEMAND",
+       "metadata": {"dataRange": {"end": "2026-01-14T14:58:24"}}},
+      {"timestamp": "2026-01-15T14:33:09.557Z", "state": "SUCCESSFUL", "success": true, "type": "ON_DEMAND",
+       "metadata": {"dataRange": {"end": "2026-01-15T07:48:32", "start": "2026-01-14T12:49:38.090000"}, "optionalData": "2026-01-15T14:03:09.557997188Z/"}}
+    ]}
+  ],
+  "stats": {"inRangePercentage": 71, "lowPercentage": 1, "highPercentage": 28, "gmi": 7.1, "averageBg": 154, "coefficientOfVariation": 31.2, "bmi": 99}
+}

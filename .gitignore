@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+# never commit real Glooko data
+*.jsonl
+snap_*.json
+secrets*.json
