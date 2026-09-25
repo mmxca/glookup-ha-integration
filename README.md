@@ -52,7 +52,7 @@ Glooko only stores what the pump cloud hands it.
 
 ## Requirements
 
-- Home Assistant **2025.1** or newer.
+- Home Assistant **2025.3** or newer.
 - A Glooko account with your pump connected. For Omnipod 5: in the Omnipod 5 app, turn on data sharing
   with Glooko (Insulet's "Insulet-provided Glooko"). Confirm your pump data shows up at
   <https://my.glooko.com> before installing this.
@@ -155,6 +155,15 @@ So: expect roughly **35-65 minutes of delay** with the sync trigger on, and pote
 "did I bolus for lunch?" reminders. It is not for anything time-critical.
 
 ---
+
+## Known limitations
+
+- **Delay:** pump data is typically 35-65 minutes behind, even with the sync trigger on. Glooko itself
+  holds back the newest ~30 minutes. With the trigger off it can be hours.
+- **Verified hardware:** Omnipod 5 (iPhone app), US region only. Other pumps and regions may work but are untested.
+- **No two-factor authentication:** accounts that require 2FA can't sign in yet.
+- **Not available from Glooko:** live IOB, reservoir level, pod battery, current basal rate.
+- **Undocumented API:** Glooko can change it at any time. Please report breakage.
 
 ## Examples
 
