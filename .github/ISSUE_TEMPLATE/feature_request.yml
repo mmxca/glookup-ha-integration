@@ -1,0 +1,22 @@
+name: Feature request
+description: Suggest a new sensor, pump, or improvement
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What would you like, and why?
+    validations:
+      required: true
+  - type: textarea
+    id: data
+    attributes:
+      label: Where does the data live in Glooko?
+      description: If you know the page on my.glooko.com or the API endpoint/field, say so. Sanitized payload structure helps a lot.
+  - type: checkboxes
+    id: readonly
+    attributes:
+      label: Scope
+      options:
+        - label: This only needs to READ data (the project will not add write access to accounts)
+          required: true

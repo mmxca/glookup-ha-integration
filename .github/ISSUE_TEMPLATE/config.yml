@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or setup help
+    url: https://github.com/mmxca/glookup-ha-integration/discussions
+    about: Ask in Discussions. Issues are for bugs and feature requests.
+  - name: Security vulnerability
+    url: https://github.com/mmxca/glookup-ha-integration/security/advisories/new
+    about: Report privately. Please don't open a public issue.

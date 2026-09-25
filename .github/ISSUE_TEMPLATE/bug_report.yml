@@ -1,0 +1,47 @@
+name: Bug report
+description: Something isn't working
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Do not paste credentials, cookies, your Glooko patient code, or unredacted health data.**
+        Diagnostics downloaded from Home Assistant are redacted, but please skim them before attaching.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: input
+    id: ha_version
+    attributes:
+      label: Home Assistant version
+      placeholder: "2026.9.2"
+    validations:
+      required: true
+  - type: input
+    id: integration_version
+    attributes:
+      label: Integration version / commit
+      placeholder: "0.1.0 or commit SHA"
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Pump / controller / region
+      placeholder: "Omnipod 5, iPhone app, US"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Debug logs (redacted)
+      description: "Enable `custom_components.glooko: debug` under `logger:` and paste the relevant lines."
+      render: text
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics
+      description: Settings → Devices & services → Glooko → ⋮ → Download diagnostics. Attach the file or paste relevant parts.

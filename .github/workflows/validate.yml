@@ -2,8 +2,13 @@ name: Validate
 
 on:
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
+
+# Least privilege: PRs from forks run with a read-only token and no secrets.
+permissions:
+  contents: read
 
 jobs:
   hassfest:
@@ -21,6 +26,7 @@ jobs:
         with:
           category: integration
           ignore: brands
+          comment: false
 
   tests:
     runs-on: ubuntu-latest
