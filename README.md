@@ -123,7 +123,7 @@ Settings → Devices & services → Glooko → **Configure**:
 |---|---|---|
 | Polling interval | 10 min | 5-60 min |
 | Mark data stale after | 120 min | 30-1440 min |
-| Ask Glooko to sync every | 30 min | 0 (off) or 20-240 min |
+| Ask Glooko to sync every | 30 min | 0 (off) or 15-240 min |
 
 Please keep polling gentle. Each poll is 3 small GET requests (a 4th, statistics, once an hour).
 
@@ -133,7 +133,8 @@ enabled, the integration performs a website sign-in at most that often, and only
 it is ready for a sync (`syncState: SYNC_ALLOWED`). It re-polls about 90 seconds later to pick up the
 fresh data. That is one extra sign-in per interval, and nothing in your account is changed. The
 outcome is shown on `sensor.glooko_last_glooko_sync` (`sync_state`, `last_sync_trigger`,
-`sync_trigger_result`). Set it to 0 to turn it off.
+`sync_trigger_result`). Set it to 0 to turn it off. The check runs on each poll, so the effective
+interval rounds up to a multiple of the polling interval (for example, 15 min with 5-min polling, 20 min with 10-min polling).
 
 ---
 
@@ -146,8 +147,8 @@ Measured on a real Omnipod 5 account (September 2026):
   **now minus 30 minutes**. When a pull happens, the newest pump data is typically **33-45 minutes old**.
 - Glooko only pulls when someone signs in on the Glooko website. The API sign-in used for polling does
   **not** trigger it. Without that, pulls may **not happen for many hours** (17 h observed overnight).
-- A website sign-in triggers a pull within about 1 second. Glooko then enforces a cooldown of roughly
-  30 minutes (`syncState: ALREADY_SYNCED`).
+- A website sign-in triggers a pull within about 1 second. Glooko then enforces a short cooldown
+  (`syncState: ALREADY_SYNCED`, about 12 minutes observed).
 - With the sync trigger on (default: every 30 min), pump data typically stays **about 35-65 minutes behind**.
 
 So: expect roughly **35-65 minutes of delay** with the sync trigger on, and potentially hours with it off. This is fine for logging, dashboards and

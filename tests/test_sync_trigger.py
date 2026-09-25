@@ -179,8 +179,8 @@ async def test_options_validate_sync_interval(hass: HomeAssistant, patch_client)
         result = await hass.config_entries.options.async_configure(result["flow_id"], {**base, CONF_SYNC_TRIGGER: 10})
         assert result["type"] is FlowResultType.FORM
         assert result["errors"] == {CONF_SYNC_TRIGGER: "sync_too_frequent"}
-        result = await hass.config_entries.options.async_configure(result["flow_id"], {**base, CONF_SYNC_TRIGGER: 45})
+        result = await hass.config_entries.options.async_configure(result["flow_id"], {**base, CONF_SYNC_TRIGGER: 15})
         assert result["type"] is FlowResultType.CREATE_ENTRY
-        assert entry.options[CONF_SYNC_TRIGGER] == 45
+        assert entry.options[CONF_SYNC_TRIGGER] == 15
         await hass.async_block_till_done()
         await hass.config_entries.async_unload(entry.entry_id)

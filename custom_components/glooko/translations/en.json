@@ -45,12 +45,12 @@
         "data_description": {
           "scan_interval": "How often to poll Glooko (5-60 minutes). Please keep it gentle.",
           "stale_minutes": "The 'Data stale' problem sensor turns on when the newest pump data is older than this.",
-          "sync_trigger_minutes": "Glooko only pulls new pump data from Insulet when someone signs in on its website. The integration can do a website sign-in this often to keep data fresh (typically 35-65 min behind instead of hours). Minimum 20. Set to 0 to turn off."
+          "sync_trigger_minutes": "Glooko only pulls new pump data from Insulet when someone signs in on its website. The integration can do a website sign-in this often to keep data fresh (typically 35-65 min behind instead of hours). Minimum 15. The check runs on each poll, so set the polling interval to 5 min to get a true 15. Set to 0 to turn off."
         }
       }
     },
     "error": {
-      "sync_too_frequent": "Use 0 (off) or at least 20 minutes."
+      "sync_too_frequent": "Use 0 (off) or at least 15 minutes."
     }
   },
   "selector": {

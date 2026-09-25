@@ -19,7 +19,7 @@ DEFAULT_STALE_MINUTES = 120
 STATS_REFRESH_MINUTES = 60
 # Web sign-in makes Glooko pull from the pump cloud (ON_DEMAND). 0 disables.
 DEFAULT_SYNC_TRIGGER = 30
-MIN_SYNC_TRIGGER = 20
+MIN_SYNC_TRIGGER = 15  # Glooko's post-sync cooldown measured at ~12 min
 MAX_SYNC_TRIGGER = 240
 SYNC_REFRESH_DELAY = 90  # seconds to wait before re-polling after a trigger
 
