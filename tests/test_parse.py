@@ -114,3 +114,16 @@ def test_pump_mode_since_stops_at_gap():
     ]}}
     d = _parse(graph=graph)
     assert d.pump_mode_since == datetime(2026, 1, 14, 12, 0, tzinfo=TZ)
+
+
+def test_longer_window_stats_are_kept_separate():
+    d = _parse(window_stats={30: {"inRangePercentage": 80, "gmi": 6.9, "bmi": 99}, 90: {"inRangePercentage": 75}})
+    assert d.stats["inRangePercentage"] == 71  # 14-day stats untouched
+    assert d.window_stats == {30: {"inRangePercentage": 80, "gmi": 6.9}, 90: {"inRangePercentage": 75}}
+
+
+def test_failed_window_is_left_out():
+    d = _parse(window_stats={30: {"inRangePercentage": 80}, 90: None})
+    assert 30 in d.window_stats
+    assert 90 not in d.window_stats
+    assert _parse().window_stats == {}

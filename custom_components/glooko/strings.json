@@ -125,6 +125,24 @@
       },
       "average_glucose_14d": {
         "name": "Average glucose 14d"
+      },
+      "time_in_range_30d": {
+        "name": "Time in range 30d"
+      },
+      "gmi_30d": {
+        "name": "GMI 30d"
+      },
+      "average_glucose_30d": {
+        "name": "Average glucose 30d"
+      },
+      "time_in_range_90d": {
+        "name": "Time in range 90d"
+      },
+      "gmi_90d": {
+        "name": "GMI 90d"
+      },
+      "average_glucose_90d": {
+        "name": "Average glucose 90d"
       }
     },
     "binary_sensor": {
