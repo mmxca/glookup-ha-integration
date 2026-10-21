@@ -11,6 +11,7 @@
 
 ## Checklist
 
+- [ ] PR title follows Conventional Commits (`feat:`, `fix:`, `docs:`, ...); it becomes the commit message and drives releases
 - [ ] `python -m pytest` passes locally
 - [ ] Tests added or updated (synthetic fixtures only)
 - [ ] `strings.json` and `translations/en.json` updated together (if entities or config changed)

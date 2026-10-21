@@ -123,8 +123,26 @@ The `.gitignore` blocks `*.jsonl` and `snap_*.json` to make accidentally committ
 
 ## Commit messages and PR titles
 
-Short, imperative, specific: `Fix pod expiry when site change and reservoir change differ`,
-`Add sensor for last temporary basal`. Reference issues with `Fixes #12` in the PR description.
+PR titles follow [Conventional Commits](https://www.conventionalcommits.org/), because the squashed
+PR title is what [release-please](https://github.com/googleapis/release-please) reads to pick the
+next version and write the changelog:
+
+| Prefix | Use for | Release |
+|---|---|---|
+| `feat:` | new sensor, option or behavior | minor (`0.2.0` → `0.3.0`) |
+| `fix:` | bug fix | patch (`0.2.0` → `0.2.1`) |
+| `docs:`, `test:`, `ci:`, `chore:`, `refactor:` | everything else | none |
+
+After the prefix: short, imperative, specific. For example
+`fix: pod expiry when site change and reservoir change differ`, `feat: add sensor for last temporary basal`.
+Reference issues with `Fixes #12` in the PR description.
+
+## Releases
+
+Releases are automated. After changes land on `main`, release-please opens (or updates) a
+**release PR** that bumps `custom_components/glooko/manifest.json`, `.release-please-manifest.json`
+and `CHANGELOG.md`. A maintainer merges it when ready, and release-please then tags `vX.Y.Z` and
+publishes the GitHub release, which HACS offers to users as an update. Don't edit the version by hand.
 
 ## Reviews
 
