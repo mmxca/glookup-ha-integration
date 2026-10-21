@@ -7,6 +7,7 @@ Sync/transfer timestamps (syncTimestamp, updatedAt, transfer 'timestamp') are tr
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta, timezone, tzinfo
 from typing import Any
@@ -91,6 +92,8 @@ class GlookoData:
     last_sync_trigger: datetime | None = None
     sync_trigger_result: str | None = None
     stats: dict[str, Any] = field(default_factory=dict)
+    # Longer windows keyed by days (30, 90); a window whose request failed is absent.
+    window_stats: dict[int, dict[str, Any]] = field(default_factory=dict)
 
     @property
     def pod_expires(self) -> datetime | None:
@@ -157,6 +160,7 @@ def parse(
     stats: dict[str, Any] | None,
     tz: tzinfo,
     now: datetime,
+    window_stats: Mapping[int, dict[str, Any] | None] | None = None,
 ) -> GlookoData:
     """Normalize raw Glooko payloads."""
     data = GlookoData(fetched_at=now)
@@ -246,11 +250,17 @@ def parse(
         candidates = [c for c in candidates if c]
         data.data_through = max(candidates) if candidates else None
 
-    # --- 14-day statistics (only a few well-defined fields) ---
-    if stats:
-        for key in ("inRangePercentage", "lowPercentage", "highPercentage", "gmi", "averageBg",
-                    "coefficientOfVariation", "activeCgmTimePercentage", "carbsPerDay"):
-            if key in stats:
-                data.stats[key] = stats[key]
+    # --- 14-day and longer-window statistics (only a few well-defined fields) ---
+    data.stats = _pick_stats(stats)
+    data.window_stats = {days: _pick_stats(raw) for days, raw in (window_stats or {}).items() if raw is not None}
 
     return data
+
+
+def _pick_stats(stats: dict[str, Any] | None) -> dict[str, Any]:
+    return {
+        key: stats[key]
+        for key in ("inRangePercentage", "lowPercentage", "highPercentage", "gmi", "averageBg",
+                    "coefficientOfVariation", "activeCgmTimePercentage", "carbsPerDay")
+        if key in (stats or {})
+    }

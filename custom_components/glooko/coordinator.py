@@ -21,6 +21,7 @@ from .const import (
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_SYNC_TRIGGER,
     DOMAIN,
+    EXTRA_STATS_WINDOWS,
     GRAPH_SERIES,
     INSULET_INTEGRATION,
     STATS_REFRESH_MINUTES,
@@ -50,6 +51,8 @@ class GlookoCoordinator(DataUpdateCoordinator[GlookoData]):
         self.client = client
         self._stats: dict[str, Any] | None = None
         self._stats_at = None
+        self._window_stats: dict[int, dict[str, Any] | None] = {}
+        self._window_stats_at: dict[int, Any] = {}
         self.raw: dict[str, Any] = {}
         self._last_trigger = None
         self._trigger_result: str | None = None
@@ -80,23 +83,13 @@ class GlookoCoordinator(DataUpdateCoordinator[GlookoData]):
                 "/api/v3/cloud_connections", {"clientType": "web", "patient": code}
             )
             if self._stats_at is None or now - self._stats_at > timedelta(minutes=STATS_REFRESH_MINUTES):
-                s_start, s_end = glooko_day_range(today - timedelta(days=13), today)
-                self._stats = await self.client.async_get(
-                    "/api/v3/graph/statistics/overall",
-                    {
-                        "patient": code,
-                        "startDate": s_start,
-                        "endDate": s_end,
-                        "egv": "true",
-                        "normalized": "false",
-                        "includeInsulin": "true",
-                        "includeExercise": "false",
-                        "excludeManual": "false",
-                        "dow": "monday,tuesday,wednesday,thursday,friday,saturday,sunday",
-                        "includePumpModes": "true",
-                    },
-                )
+                self._stats = await self._async_get_stats(code, today, 14)
                 self._stats_at = now
+            for days in EXTRA_STATS_WINDOWS:
+                fetched_at = self._window_stats_at.get(days)
+                if fetched_at is None or now - fetched_at > timedelta(minutes=STATS_REFRESH_MINUTES):
+                    await self._async_refresh_window(code, today, days)
+                    self._window_stats_at[days] = now
         except GlookoAuthError as err:
             raise ConfigEntryAuthFailed(str(err)) from err
         except GlookoError as err:
@@ -104,7 +97,13 @@ class GlookoCoordinator(DataUpdateCoordinator[GlookoData]):
 
         await self._maybe_trigger_sync(connections, now)
 
-        self.raw = {"graph": graph, "devices": devices, "connections": connections, "stats": self._stats}
+        self.raw = {
+            "graph": graph,
+            "devices": devices,
+            "connections": connections,
+            "stats": self._stats,
+            "window_stats": self._window_stats,
+        }
         data = parse(
             graph=graph,
             devices=devices,
@@ -112,10 +111,43 @@ class GlookoCoordinator(DataUpdateCoordinator[GlookoData]):
             stats=self._stats,
             tz=tz,
             now=now,
+            window_stats=self._window_stats,
         )
         data.last_sync_trigger = self._last_trigger
         data.sync_trigger_result = self._trigger_result
         return data
+
+    async def _async_get_stats(self, code: str, today, days: int) -> Any:
+        start, end = glooko_day_range(today - timedelta(days=days - 1), today)
+        return await self.client.async_get(
+            "/api/v3/graph/statistics/overall",
+            {
+                "patient": code,
+                "startDate": start,
+                "endDate": end,
+                "egv": "true",
+                "normalized": "false",
+                "includeInsulin": "true",
+                "includeExercise": "false",
+                "excludeManual": "false",
+                "dow": "monday,tuesday,wednesday,thursday,friday,saturday,sunday",
+                "includePumpModes": "true",
+            },
+        )
+
+    async def _async_refresh_window(self, code: str, today, days: int) -> None:
+        """Fetch one longer statistics window.
+
+        A failure only blanks this window (its sensors go unavailable until the next hourly
+        retry); auth errors still propagate so reauth starts.
+        """
+        try:
+            self._window_stats[days] = await self._async_get_stats(code, today, days)
+        except GlookoAuthError:
+            raise
+        except GlookoError as err:
+            self._window_stats[days] = None
+            _LOGGER.warning("Glooko %s-day statistics failed (other sensors still update): %s", days, err)
 
     async def _maybe_trigger_sync(self, connections: Any, now) -> None:
         """Ask Glooko to pull fresh pump data via a web sign-in, at most every N minutes.

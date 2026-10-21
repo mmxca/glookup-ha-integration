@@ -17,6 +17,8 @@ MIN_SCAN_INTERVAL = 5
 MAX_SCAN_INTERVAL = 60
 DEFAULT_STALE_MINUTES = 120
 STATS_REFRESH_MINUTES = 60
+# Longer statistics windows (days), each fetched separately; 14 days stays the primary window.
+EXTRA_STATS_WINDOWS: tuple[int, ...] = (30, 90)
 # Web sign-in makes Glooko pull from the pump cloud (ON_DEMAND). 0 disables.
 DEFAULT_SYNC_TRIGGER = 30
 MIN_SYNC_TRIGGER = 15  # Glooko's post-sync cooldown measured at ~12 min

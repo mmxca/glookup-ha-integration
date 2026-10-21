@@ -18,7 +18,7 @@ from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.util import dt as dt_util
 
-from .const import PUMP_MODES
+from .const import EXTRA_STATS_WINDOWS, PUMP_MODES
 from .coordinator import GlookoConfigEntry, GlookoCoordinator
 from .entity import GlookoEntity
 from .parse import GlookoData
@@ -32,6 +32,7 @@ UNIT_MGDL = "mg/dL"
 class GlookoSensorDescription(SensorEntityDescription):
     value_fn: Callable[[GlookoData], Any]
     attrs_fn: Callable[[GlookoData], dict[str, Any] | None] = lambda d: None
+    available_fn: Callable[[GlookoData], bool] = lambda d: True
 
 
 def _bolus_attrs(d: GlookoData) -> dict[str, Any] | None:
@@ -201,6 +202,53 @@ SENSORS: tuple[GlookoSensorDescription, ...] = (
 )
 
 
+def _window_sensors(days: int) -> tuple[GlookoSensorDescription, ...]:
+    """Same shape as the 14-day statistics sensors, for a longer window."""
+
+    def stats(d: GlookoData) -> dict[str, Any]:
+        return d.window_stats.get(days) or {}
+
+    def available(d: GlookoData) -> bool:
+        return days in d.window_stats
+
+    return (
+        GlookoSensorDescription(
+            key=f"time_in_range_{days}d",
+            translation_key=f"time_in_range_{days}d",
+            native_unit_of_measurement=PERCENTAGE,
+            state_class=SensorStateClass.MEASUREMENT,
+            value_fn=lambda d: stats(d).get("inRangePercentage"),
+            attrs_fn=lambda d: {
+                "low_percentage": stats(d).get("lowPercentage"),
+                "high_percentage": stats(d).get("highPercentage"),
+                "cgm_active_percentage": stats(d).get("activeCgmTimePercentage"),
+            },
+            available_fn=available,
+        ),
+        GlookoSensorDescription(
+            key=f"gmi_{days}d",
+            translation_key=f"gmi_{days}d",
+            native_unit_of_measurement=PERCENTAGE,
+            state_class=SensorStateClass.MEASUREMENT,
+            suggested_display_precision=1,
+            value_fn=lambda d: stats(d).get("gmi"),
+            available_fn=available,
+        ),
+        GlookoSensorDescription(
+            key=f"average_glucose_{days}d",
+            translation_key=f"average_glucose_{days}d",
+            native_unit_of_measurement=UNIT_MGDL,
+            state_class=SensorStateClass.MEASUREMENT,
+            value_fn=lambda d: stats(d).get("averageBg"),
+            attrs_fn=lambda d: {"coefficient_of_variation": stats(d).get("coefficientOfVariation")},
+            available_fn=available,
+        ),
+    )
+
+
+SENSORS += tuple(desc for days in EXTRA_STATS_WINDOWS for desc in _window_sensors(days))
+
+
 async def async_setup_entry(
     hass: HomeAssistant, entry: GlookoConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback
 ) -> None:
@@ -216,6 +264,10 @@ class GlookoSensor(GlookoEntity, SensorEntity):
     def __init__(self, coordinator: GlookoCoordinator, description: GlookoSensorDescription) -> None:
         super().__init__(coordinator, description.key)
         self.entity_description = description
+
+    @property
+    def available(self) -> bool:
+        return super().available and self.entity_description.available_fn(self.coordinator.data)
 
     @property
     def native_value(self) -> Any:

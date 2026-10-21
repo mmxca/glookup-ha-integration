@@ -44,6 +44,9 @@ All entities belong to one **Glooko** service device.
 | `sensor.glooko_time_in_range_14d` | % | Plus low/high % and CGM active % as attributes |
 | `sensor.glooko_gmi_14d` | % | |
 | `sensor.glooko_average_glucose_14d` | mg/dL | CV as attribute |
+| `sensor.glooko_time_in_range_30d` / `_90d` | % | Same as the 14-day sensor, over 30 / 90 days |
+| `sensor.glooko_gmi_30d` / `_90d` | % | |
+| `sensor.glooko_average_glucose_30d` / `_90d` | mg/dL | CV as attribute |
 
 Not available from Glooko: **live IOB, reservoir level, pod battery, current basal rate as a number.**
 Glooko only stores what the pump cloud hands it.
@@ -125,7 +128,7 @@ Settings → Devices & services → Glooko → **Configure**:
 | Mark data stale after | 120 min | 30-1440 min |
 | Ask Glooko to sync every | 30 min | 0 (off) or 15-240 min |
 
-Please keep polling gentle. Each poll is 3 small GET requests (a 4th, statistics, once an hour).
+Please keep polling gentle. Each poll is 3 small GET requests (plus 3 statistics requests, for 14, 30 and 90 days, once an hour).
 
 **Sync trigger:** Glooko only pulls new pump data from the pump cloud when someone signs in on the
 Glooko **website**. The API sign-in used for polling does not count. With *Ask Glooko to sync every*
@@ -228,7 +231,7 @@ actions:
   - `/api/v3/graph/data`: yesterday + today, pump series (boluses, carbs, mode spans, pod/sensor changes, alarms)
   - `/api/v3/devices_and_settings`: pump model, last sync
   - `/api/v3/cloud_connections`: Insulet cloud transfers (freshness)
-  - `/api/v3/graph/statistics/overall`: 14-day stats (hourly)
+  - `/api/v3/graph/statistics/overall`: 14-, 30- and 90-day stats (one request each, hourly)
 - Sync trigger (optional, default every 30 min): `GET` + `POST https://<region>.my.glooko.com/users/sign_in`,
   the same form a person uses. Sign-ins are the only non-GET requests the integration ever makes.
 - Glooko quirk handled: event timestamps are the pump's **local wall-clock time with a `Z` suffix**.

@@ -35,4 +35,11 @@ async def async_get_config_entry_diagnostics(hass: HomeAssistant, entry: GlookoC
         "parsed": async_redact_data(asdict(coordinator.data), TO_REDACT) if coordinator.data else None,
         "raw_devices": async_redact_data(coordinator.raw.get("devices") or {}, TO_REDACT),
         "raw_connections": async_redact_data(coordinator.raw.get("connections") or [], TO_REDACT),
+        "raw_stats": async_redact_data(
+            {
+                "14d": coordinator.raw.get("stats"),
+                **{f"{days}d": raw for days, raw in (coordinator.raw.get("window_stats") or {}).items()},
+            },
+            TO_REDACT,
+        ),
     }
