@@ -1,13 +1,17 @@
 {
   "domain": "glooko",
   "name": "Glooko",
-  "codeowners": ["@tivotyro"],
+  "codeowners": [
+    "@tivotyro"
+  ],
   "config_flow": true,
   "documentation": "https://github.com/mmxca/glookup-ha-integration",
   "integration_type": "service",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/mmxca/glookup-ha-integration/issues",
-  "loggers": ["custom_components.glooko"],
+  "loggers": [
+    "custom_components.glooko"
+  ],
   "requirements": [],
-  "version": "0.1.0"
+  "version": "0.2.0"
 }
